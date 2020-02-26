@@ -1,0 +1,243 @@
+<?php
+
+/**
+ *Classe de fonction utiles
+ *@author Ilan Nizard
+ *
+ */
+  class fonctionsUtils
+  {
+
+    //Fonction qui établie la connexion avec la base de données
+    static function activeCnx()
+    {
+      if (file_exists('utils/autoloader.php'))
+      {
+        require 'utils/autoloader.php';
+      }
+      else
+      {
+        if (file_exists('../utils/autoloader.php'))
+        {
+          require '../utils/autoloader.php';
+        }
+      }
+
+      Autoloader::register();
+      $dbh = Connexion::seConnecter();
+      $cnx = $dbh->getCnx();
+
+      return $cnx;
+    }
+/** Verifie le token */
+    static function verifToken($token)
+    {
+      if (isset($token) AND isset($_SESSION['token']))
+      {
+        if ($token != $_SESSION['token'])
+        {
+          $chemin = "../controller/c_connexion.php";
+
+          if (file_exists($chemin))
+          {
+            session_destroy();
+            header("Location: ../connexion");
+          }
+          else
+          {
+            $chemin = "controller/c_connexion.php";
+
+            if (file_exists($chemin))
+            {
+              session_destroy();
+              header("Location: connexion");
+            }
+          }
+        }
+      }
+    }
+
+    //vérifie l'existence d'un id sur une table, renvoie true si trouvé et false au cas contraire
+    static function verifId($cnx, $id, $table, $champs)
+    {
+      $selectId = $cnx->prepare("SELECT $champs FROM $table WHERE $champs = $id");
+      $selectId->execute();
+      $leId = $selectId->fetch();
+
+      if (isset($leId[0]))
+      {
+        return TRUE;
+      }
+      else
+      {
+        return FALSE;
+      }
+    }
+
+    //Fonction qui vérifie si la date est bonne
+    static function validateDate($date, $format = 'Y-m-d')
+    {
+        $d = DateTime::createFromFormat($format, $date);
+        return $d && $d->format($format) == $date;
+    }
+
+    //Fonction qui vérifie si l'heure est bonne
+    static function validateHeure($date, $format = 'H:i')
+    {
+        $d = DateTime::createFromFormat($format, $date);
+        return $d && $d->format($format) == $date;
+    }
+
+    //fonction qui retourne le mois à partir d'un chiffre
+    static function dateMois($dateMois)
+    {
+
+      switch ($dateMois)
+      {
+        case '01':
+          $dateFr = 'Janvier';
+        break;
+        case '02':
+          $dateFr = 'Février';
+        break;
+        case '03':
+          $dateFr = 'Mars';
+        break;
+        case '04':
+          $dateFr = 'Avril';
+        break;
+        case '05':
+          $dateFr = 'Mai';
+        break;
+        case '06':
+          $dateFr = 'Juin';
+        break;
+        case '07':
+          $dateFr = 'Juillet';
+        break;
+        case '08':
+          $dateFr = 'Août';
+        break;
+        case '09':
+          $dateFr = 'Septembre';
+        break;
+        case '10':
+          $dateFr = 'Octobre';
+        break;
+        case '11':
+          $dateFr = 'Novembre';
+        break;
+        case '12':
+          $dateFr = 'Décembre';
+        break;
+        default:
+          // code...
+          break;
+      }
+
+      return $dateFr;
+    }
+
+    //Fonction qui fait un tableau des mois execpté un
+    static function tblMois($numMoisAujd)
+    {
+      for ($i=1; $i <= 12; $i++)
+      {
+        //si le mois est différent de celui à exepter on l'ajoute au tableau
+        if ($i != intVal($numMoisAujd))
+        {
+          $tblMois[$i] = $i;
+        }
+      }
+      return $tblMois;
+    }
+
+    static function changeFormatBdd($d)
+    {
+      $jour = $d[0].$d[1];
+      $mois = $d[3].$d[4];
+      $annee = $d[6].$d[7].$d[8].$d[9];
+
+      $dateBdd = $annee."-".$mois."-".$jour;
+
+      return $dateBdd;
+    }
+
+    static function changeFormatFr($d)
+    {
+        $jour = $d[8].$d[9];
+        $mois = $d[5].$d[6];
+        $annee = $d[0].$d[1].$d[2].$d[3];
+
+        $dateFr = $jour."/".$mois."/".$annee;
+
+        return $dateFr;
+    }
+
+    //fonction pour sauvegarder un text / number / date
+    static function saveValue($input)
+    {
+      if (isset($_POST[$input]))
+      {
+        return $_POST[$input];
+      }
+    }
+
+    //fonction pour sauvegarder un select
+    static function saveSelect($select, $id)
+    {
+      if (isset($_POST[$select]) AND $_POST[$select] == $id)
+      {
+        return "selected";
+      }
+      else
+      {
+        return null;
+      }
+    }
+
+    //fonction pour sauvegarder un checkbox
+    static function saveCheck($check, $id)
+    {
+      if (isset($_POST[$check]) AND $_POST[$check] == $id)
+      {
+        return "checked";
+      }
+      else
+      {
+        return null;
+      }
+    }
+
+    static function saveCheck2($check)
+    {
+      if (isset($_POST[$check]))
+      {
+        return "checked";
+      }
+      else
+      {
+        return null;
+      }
+    }
+
+    //fonction qui garde le niveau d'avancement d'un input range
+    static function saveRange($range)
+    {
+      if(isset($_POST[$range]))
+      {
+        return $_POST[$range];
+      }
+      else
+      {
+        return '0';
+      }
+    }
+  }
+
+
+
+
+
+?>
+

@@ -1,0 +1,60 @@
+<?php
+
+    /**
+     *Classe singleton qui permet d'établir la connexion à la base de données
+     *@author Ilan Nizard
+     *
+     */
+    class Connexion
+    {
+      private static $instance;
+
+      private $cnx;
+
+      public static function seConnecter()
+      {
+        if(is_null(self::$instance))
+        {
+          self::$instance = new Connexion();
+        }
+
+        return self::$instance;
+      }
+
+
+
+      private function __construct()
+      {
+        $prm = Parametre::getInstance();
+        $param = $prm->getTabPrm();
+
+        $dbhost = $param['localhost'];
+        $dbdatabase = $param['restaurant-in'];
+        $dbuser = $param['root'];
+        $dbpw = $param[''];
+
+        try
+        {
+          $this->cnx = new PDO('mysql:dbname='.$dbdatabase.';dbhost='.$dbhost.';dbuser='.$dbuser. ,$dbpw);
+        } catch (\Exception $e)
+        {
+          echo "Erreur de connexion : " . $e->getMessage();
+        }
+      }
+
+    /**
+     *Fonction qui renvoie si la connexion à la bdd est établie ou pas
+     *
+     */
+    public function getCnx()
+    {
+        return $this->cnx;
+    }
+
+
+}
+
+
+
+?>
+
